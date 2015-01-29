@@ -1,0 +1,2 @@
+model,description,training accuracy,test accuracy,iterations
+model1,default;local normalization for Y channel only,0.98146252235281,0.88387369391518,20
