@@ -193,7 +193,7 @@ for i,channel in ipairs(channels) do
 end
 
 -- Local normalization
-print '==> preprocessing data: normalize all three channels locally'
+print '==> preprocessing data: normalize Y channel locally'
 
 -- Define the normalization neighborhood:
 neighborhood = image.gaussian1D(13)
