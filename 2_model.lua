@@ -48,9 +48,9 @@ ninputs = nfeats*width*height
 nhiddens = ninputs / 2
 
 -- hidden units, filter sizes (for ConvNet only):
-nstates = {64,64,128}
+nstates = {96,128,256,2048,2048}
 filtsize = 5
-poolsize = 2
+poolsize = 3
 normkernel = image.gaussian1D(7)
 
 ----------------------------------------------------------------------
@@ -108,23 +108,33 @@ elseif opt.model == 'convnet' then
 
       model = nn.Sequential()
 
-      -- stage 1 : filter bank -> squashing -> L2 pooling -> normalization
+      -- stage 1 : filter bank -> squashing -> Max pooling
+      model:add(nn.Dropout(0.9))      
       model:add(nn.SpatialConvolutionMM(nfeats, nstates[1], filtsize, filtsize))
-      model:add(nn.Tanh())
-      model:add(nn.SpatialLPPooling(nstates[1],2,poolsize,poolsize,poolsize,poolsize))
-      model:add(nn.SpatialSubtractiveNormalization(nstates[1], normkernel))
+      model:add(nn.ReLU())
+      model:add(nn.SpatialMaxPooling(poolsize,poolsize,2,2))
 
-      -- stage 2 : filter bank -> squashing -> L2 pooling -> normalization
+      model:add(nn.Dropout(0.75))      
       model:add(nn.SpatialConvolutionMM(nstates[1], nstates[2], filtsize, filtsize))
-      model:add(nn.Tanh())
-      model:add(nn.SpatialLPPooling(nstates[2],2,poolsize,poolsize,poolsize,poolsize))
-      model:add(nn.SpatialSubtractiveNormalization(nstates[2], normkernel))
+      model:add(nn.ReLU())
+      model:add(nn.SpatialMaxPooling(poolsize,poolsize,2,2))
 
-      -- stage 3 : standard 2-layer neural network
-      model:add(nn.Reshape(nstates[2]*filtsize*filtsize))
-      model:add(nn.Linear(nstates[2]*filtsize*filtsize, nstates[3]))
-      model:add(nn.Tanh())
-      model:add(nn.Linear(nstates[3], noutputs))
+      model:add(nn.Dropout(0.75))      
+      model:add(nn.SpatialConvolutionMM(nstates[2], nstates[3], filtsize, filtsize))
+      model:add(nn.ReLU())
+      model:add(nn.SpatialMaxPooling(poolsize,poolsize,2,2))
+
+      -- stage 2 : standard 2-layer neural network
+      model:add(nn.View(nstates[3]*filtsize*filtsize))
+      model:add(nn.Dropout(0.5))
+      model:add(nn.Linear(nstates[3]*filtsize*filtsize, nstates[4]))
+      model:add(nn.ReLU())
+      model:add(nn.Dropout(0.5))      
+      model:add(nn.Linear(nstates[4], nstates[5]))
+      model:add(nn.ReLU())
+      model:add(nn.Dropout(0.5))      
+      model:add(nn.Linear(nstates[4], noutputs))
+      
    end
 else
 
