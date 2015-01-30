@@ -1,0 +1,4 @@
+Preprocess: Convert to YUV, normalize all 3 channels, locally normalize Y channel (contrastive normalization)
+Model: Convolution Layer (64 filters, size 5x5, stride 1, tanh) -> L2 Pooling (poolsize 2, subtractive normalization)
+      -> Convolution Layer (64 filters, size 5x5, stride 1, tanh) -> L2 Pooling (poolsize 2, subtractive normalization)
+      -> Hidden Layer (128 hidden nodes, tanh) -> Output Layer (linear?)
