@@ -125,7 +125,7 @@ elseif opt.model == 'convnet' then
       model:add(nn.SpatialMaxPooling(poolsize,poolsize,2,2))
 
       -- stage 2 : standard 2-layer neural network
-      model:add(nn.View(nstates[3]*filtsize*filtsize))
+      model:add(nn.Reshape(nstates[3]*filtsize*filtsize))
       model:add(nn.Dropout(0.5))
       model:add(nn.Linear(nstates[3]*filtsize*filtsize, nstates[4]))
       model:add(nn.ReLU())
@@ -133,7 +133,7 @@ elseif opt.model == 'convnet' then
       model:add(nn.Linear(nstates[4], nstates[5]))
       model:add(nn.ReLU())
       model:add(nn.Dropout(0.5))      
-      model:add(nn.Linear(nstates[4], noutputs))
+      model:add(nn.Linear(nstates[5], noutputs))
       
    end
 else
