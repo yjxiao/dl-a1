@@ -71,8 +71,6 @@ dofile '5_test.lua'
 
 ----------------------------------------------------------------------
 print '==> training!'
-require('mobdebug').start()
-require("mobdebug").off()
 while true do
    train()
    test()

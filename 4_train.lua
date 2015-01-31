@@ -12,7 +12,6 @@
 --
 -- Clement Farabet
 ----------------------------------------------------------------------
-require("mobdebug").off()
 require 'torch'   -- torch
 require 'xlua'    -- xlua provides useful tools, like progress bars
 require 'optim'   -- an optimization package, for online and batch methods
@@ -155,7 +154,6 @@ function train()
                        local f = 0
 
                        -- evaluate function for complete mini batch
-		       require("mobdebug").on()
                        for i = 1,#inputs do
                           -- estimate f
                           local output = model:forward(inputs[i])
