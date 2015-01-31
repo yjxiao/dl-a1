@@ -1,7 +1,7 @@
 # DS-GA-1008 Deep Learning
 **Assignment 1**: SVHN Dataset
 
-**Group**: BearCat 熊猫
+**Team**: BearCat 熊猫
 
 **Members**:
 - Yijun Xiao [@yjxiao](https://github.com/yjxiao)
