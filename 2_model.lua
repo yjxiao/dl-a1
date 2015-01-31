@@ -51,7 +51,6 @@ nhiddens = ninputs / 2
 nstates = {96,128,256,2048,2048}
 filtsize = 5
 poolsize = 3
-normkernel = image.gaussian1D(7)
 
 ----------------------------------------------------------------------
 print '==> construct model'
@@ -109,29 +108,31 @@ elseif opt.model == 'convnet' then
       model = nn.Sequential()
 
       -- stage 1 : filter bank -> squashing -> Max pooling
-      model:add(nn.Dropout(0.9))      
-      model:add(nn.SpatialConvolutionMM(nfeats, nstates[1], filtsize, filtsize))
+      model:add(nn.Dropout(0.1))      
+      model:add(nn.SpatialConvolutionMM(nfeats, nstates[1], filtsize, filtsize, 1, 1, 2))
       model:add(nn.ReLU())
       model:add(nn.SpatialMaxPooling(poolsize,poolsize,2,2))
 
-      model:add(nn.Dropout(0.75))      
-      model:add(nn.SpatialConvolutionMM(nstates[1], nstates[2], filtsize, filtsize))
+      model:add(nn.Dropout(0.25))      
+      model:add(nn.SpatialConvolutionMM(nstates[1], nstates[2], filtsize, filtsize, 1, 1, 2))
       model:add(nn.ReLU())
       model:add(nn.SpatialMaxPooling(poolsize,poolsize,2,2))
 
-      model:add(nn.Dropout(0.75))      
-      model:add(nn.SpatialConvolutionMM(nstates[2], nstates[3], filtsize, filtsize))
+      model:add(nn.Dropout(0.25))      
+      model:add(nn.SpatialConvolutionMM(nstates[2], nstates[3], filtsize, filtsize, 1, 1, 2))
       model:add(nn.ReLU())
       model:add(nn.SpatialMaxPooling(poolsize,poolsize,2,2))
 
-      -- stage 2 : standard 2-layer neural network
-      model:add(nn.Reshape(nstates[3]*filtsize*filtsize))
+      -- stage 2 : standard 3-layer neural network
+      model:add(nn.View(nstates[3]*3*3))
       model:add(nn.Dropout(0.5))
-      model:add(nn.Linear(nstates[3]*filtsize*filtsize, nstates[4]))
+      model:add(nn.Linear(nstates[3]*3*3, nstates[4]))
       model:add(nn.ReLU())
+      
       model:add(nn.Dropout(0.5))      
-      model:add(nn.Linear(nstates[4], nstates[5]))
+      model:add(nn.Linear(nstates[4], nstates[5]))      
       model:add(nn.ReLU())
+      
       model:add(nn.Dropout(0.5))      
       model:add(nn.Linear(nstates[5], noutputs))
       
