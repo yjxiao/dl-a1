@@ -33,7 +33,7 @@ if not opt then
 end
 
 ----------------------------------------------------------------------
-model_file = 'model.net'
+model_file = 'results/model.net'
 model = torch.load(model_file)
 ----------------------------------------------------------------------
 print '==> here is the model:'
