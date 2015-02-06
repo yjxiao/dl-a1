@@ -52,9 +52,9 @@ end
 
 -- Load model
 print('==> loading model')
-model_file = 'model_sr_14.net'
+model_file = 'model_sr_21.net'
 if not paths.filep(model_file) then
-   os.exit('Model file name needs to be model.net')
+   os.exit('Please check model file name: '..model_file) 
 end
 model = torch.load(model_file)
 
