@@ -48,9 +48,9 @@ ninputs = nfeats*width*height
 nhiddens = ninputs / 2
 
 -- hidden units, filter sizes (for ConvNet only):
-nstates = {96,128,256,2048,2048}
+nstates = {64,64,128}
 filtsize = 5
-poolsize = 3
+poolsize = 2
 
 ----------------------------------------------------------------------
 print '==> construct model'
@@ -104,37 +104,28 @@ elseif opt.model == 'convnet' then
       -- generalization. Normalization is not done exactly as proposed in
       -- the paper, and low-level (first layer) features are not fed to
       -- the classifier.
-
       model = nn.Sequential()
 
-      -- stage 1 : filter bank -> squashing -> Max pooling
-      model:add(nn.Dropout(0.1))      
-      model:add(nn.SpatialConvolutionMM(nfeats, nstates[1], filtsize, filtsize, 1, 1, 2))
-      model:add(nn.ReLU())
-      model:add(nn.SpatialMaxPooling(poolsize,poolsize,2,2))
+      -- stage 1 : filter bank -> squashing -> L2 pooling -> normalization
+      model:add(nn.Dropout(0.1))
+      model:add(nn.SpatialConvolutionMM(nfeats, nstates[1], filtsize, filtsize))
+      model:add(nn.Tanh())
+      model:add(nn.SpatialLPPooling(nstates[1],2,poolsize,poolsize,poolsize,poolsize))
+      model:add(nn.SpatialSubtractiveNormalization(nstates[1], normkernel))
 
-      model:add(nn.Dropout(0.25))      
-      model:add(nn.SpatialConvolutionMM(nstates[1], nstates[2], filtsize, filtsize, 1, 1, 2))
-      model:add(nn.ReLU())
-      model:add(nn.SpatialMaxPooling(poolsize,poolsize,2,2))
+      -- stage 2 : filter bank -> squashing -> L2 pooling -> normalization
+      model:add(nn.Dropout(0.2))
+      model:add(nn.SpatialConvolutionMM(nstates[1], nstates[2], filtsize, filtsize))
+      model:add(nn.Tanh())
+      model:add(nn.SpatialLPPooling(nstates[2],2,poolsize,poolsize,poolsize,poolsize))
+      model:add(nn.SpatialSubtractiveNormalization(nstates[2], normkernel))
 
-      model:add(nn.Dropout(0.25))      
-      model:add(nn.SpatialConvolutionMM(nstates[2], nstates[3], filtsize, filtsize, 1, 1, 2))
-      model:add(nn.ReLU())
-      model:add(nn.SpatialMaxPooling(poolsize,poolsize,2,2))
-
-      -- stage 2 : standard 3-layer neural network
-      model:add(nn.View(nstates[3]*3*3))
+      -- stage 3 : standard 2-layer neural network
+      model:add(nn.Reshape(nstates[2]*filtsize*filtsize))
       model:add(nn.Dropout(0.5))
-      model:add(nn.Linear(nstates[3]*3*3, nstates[4]))
-      model:add(nn.ReLU())
-      
-      model:add(nn.Dropout(0.5))      
-      model:add(nn.Linear(nstates[4], nstates[5]))      
-      model:add(nn.ReLU())
-      
-      model:add(nn.Dropout(0.5))      
-      model:add(nn.Linear(nstates[5], noutputs))
+      model:add(nn.Linear(nstates[2]*filtsize*filtsize, nstates[3]))
+      model:add(nn.Tanh())
+      model:add(nn.Linear(nstates[3], noutputs))
       
    end
 else
